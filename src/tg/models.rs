@@ -19,8 +19,8 @@ pub enum Response<T> {
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Update {
-    update_id: i64,
-    message: Option<Message>,
+    pub update_id: i64,
+    pub message: Option<Message>,
 }
 
 #[derive(serde::Deserialize, Debug)]
