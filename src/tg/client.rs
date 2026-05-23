@@ -16,6 +16,10 @@ impl Client {
     pub async fn get_me(&self) -> anyhow::Result<User> {
         let url = format!("https://api.telegram.org/bot{}/getMe", self.token);
 
-        reqwest::get(&url).await?.json::<Response<User>>().await?.into_result()
+        reqwest::get(&url)
+            .await?
+            .json::<Response<User>>()
+            .await?
+            .into_result()
     }
 }
