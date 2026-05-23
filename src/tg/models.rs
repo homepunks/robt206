@@ -73,3 +73,12 @@ impl<T> Response<T> {
         }
     }
 }
+
+impl Update {
+    pub fn is_audio(&self) -> bool {
+        match &self.message {
+            Some(msg) => msg.voice.is_some() || msg.audio.is_some(),
+            None => false,
+        }
+    }
+}
