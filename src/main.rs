@@ -1,12 +1,14 @@
 use robt206::tg::{self, Message};
-use tokio::fs;
 use std::env;
+use tokio::fs;
 
 #[tokio::main]
 #[allow(unreachable_code)]
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     let token = env::var("TG_BOT_TOKEN")?;
+    fs::create_dir_all("cache").await?;
+    println!("INFO: created directory for storing cache...");
     let client = tg::Client::new(token);
 
     println!("INFO: starting polling...");
@@ -19,10 +21,10 @@ async fn main() -> anyhow::Result<()> {
             if let Some(file_id) = &update.message.as_ref().and_then(Message::audio_file_id) {
                 match client.extract_bytes(file_id).await {
                     Ok(audio_raw) => {
-                        let cache = format!("voice_{}.oga", update.update_id);
+                        let cache = format!("cache/voice_{}.oga", update.update_id);
                         fs::write(&cache, &audio_raw).await?;
                         println!("Saved {} ({} bytes)", cache, audio_raw.len());
-                    },
+                    }
                     Err(e) => eprintln!("Skipping {} due to error: {:#}", update.update_id, e),
                 }
             }
