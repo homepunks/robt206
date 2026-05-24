@@ -1,8 +1,8 @@
 #[derive(serde::Deserialize, Debug)]
 pub struct User {
-    id: i64,
-    first_name: String,
-    username: Option<String>,
+    pub id: i64,
+    pub first_name: String,
+    pub username: Option<String>,
 }
 
 #[derive(serde::Deserialize, Debug)]
@@ -24,20 +24,28 @@ pub struct Update {
 }
 
 #[derive(serde::Deserialize, Debug)]
-struct Message {
-    message_id: i64,
-    date: i64,
-    from: Option<User>,
-    chat: Chat,
-    voice: Option<Voice>,
-    audio: Option<Audio>,
+pub struct Message {
+    pub message_id: i64,
+    pub date: i64,
+    pub from: Option<User>,
+    pub chat: Chat,
+    pub voice: Option<Voice>,
+    pub audio: Option<Audio>,
 }
 
 #[derive(serde::Deserialize, Debug)]
-struct Chat {
-    id: i64,
+pub struct Chat {
+    pub id: i64,
     #[serde(rename = "type")]
-    chat_type: String,
+    pub chat_type: String,
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct File {
+    pub file_id: String,
+    pub file_unique_id: String,
+    pub file_size: Option<i64>,
+    pub file_path: Option<String>,
 }
 
 #[derive(serde::Deserialize, Debug)]
@@ -74,11 +82,9 @@ impl<T> Response<T> {
     }
 }
 
-impl Update {
-    pub fn is_audio(&self) -> bool {
-        match &self.message {
-            Some(msg) => msg.voice.is_some() || msg.audio.is_some(),
-            None => false,
-        }
+impl Message {
+    pub fn audio_file_id(&self) -> Option<&str> {
+        self.voice.as_ref().map(|v| v.file_id.as_str())
+            .or_else(|| self.audio.as_ref().map(|a| a.file_id.as_str()))
     }
 }
