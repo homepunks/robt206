@@ -1,4 +1,4 @@
-use crate::tg::models::{Response, Update, User, File};
+use crate::tg::models::{File, Response, Update, User};
 
 pub struct Client {
     http: reqwest::Client,
@@ -53,13 +53,18 @@ impl Client {
     }
 
     pub async fn download_file(&self, file_path: &str) -> anyhow::Result<Vec<u8>> {
-        let url = format!("https://api.telegram.org/file/bot{}/{}", self.token, file_path);
-        let bytes = self.http
+        let url = format!(
+            "https://api.telegram.org/file/bot{}/{}",
+            self.token, file_path
+        );
+        let bytes = self
+            .http
             .get(&url)
             .send()
             .await?
             .error_for_status()?
-            .bytes().await?;
+            .bytes()
+            .await?;
 
         Ok(bytes.to_vec())
     }
@@ -69,10 +74,11 @@ impl Client {
     pub async fn extract_bytes(&self, file_id: &str) -> anyhow::Result<Vec<u8>> {
         let file = self.get_file(file_id).await?;
         let Some(file_path) = file.file_path.as_deref() else {
-            anyhow::bail!("Telegram API did not return a file_path. Likely, the file is too big (>20Mb)");
+            anyhow::bail!(
+                "Telegram API did not return a file_path. Likely, the file is too big (>20Mb)"
+            );
         };
-        
+
         self.download_file(file_path).await
-        
     }
 }

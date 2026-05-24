@@ -84,7 +84,9 @@ impl<T> Response<T> {
 
 impl Message {
     pub fn audio_file_id(&self) -> Option<&str> {
-        self.voice.as_ref().map(|v| v.file_id.as_str())
+        self.voice
+            .as_ref()
+            .map(|v| v.file_id.as_str())
             .or_else(|| self.audio.as_ref().map(|a| a.file_id.as_str()))
     }
 }
