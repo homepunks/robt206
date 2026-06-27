@@ -1,4 +1,5 @@
 use crate::tg::models::{File, Response, Update, User};
+use reqwest::multipart::{Part, Form};
 
 pub struct Client {
     http: reqwest::Client,
@@ -70,7 +71,7 @@ impl Client {
     }
 
     /// I need some time to think if I need get_file and download_file methods
-    /// to be decoupled or merged within extract_bytes.
+    /// to be decoupled or merged within extract_bytes
     pub async fn extract_bytes(&self, file_id: &str) -> anyhow::Result<Vec<u8>> {
         let file = self.get_file(file_id).await?;
         let Some(file_path) = file.file_path.as_deref() else {
@@ -80,5 +81,24 @@ impl Client {
         };
 
         self.download_file(file_path).await
+    }
+
+    pub async fn send_voice(&self, chat_id: i64, oga: Vec<u8>) -> anyhow::Result<()> {
+        let url = format!("https://api.telegram.org/bot{}/sendVoice", self.token);
+        let voice = Part::bytes(oga)
+            .file_name("voice.oga")
+            .mime_str("audio/ogg")?;
+        let form = Form::new()
+            .text("chat_id", chat_id.to_string())
+            .part("voice", voice);
+
+        self.http
+          .post(&url)
+          .multipart(form)
+          .send()
+          .await?
+          .error_for_status()?;
+
+      Ok(())
     }
 }

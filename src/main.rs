@@ -1,4 +1,5 @@
-use robt206::tg::{self, Message};
+use robt206::tg;
+use robt206::audio;
 use std::env;
 use tokio::fs;
 
@@ -18,15 +19,22 @@ async fn main() -> anyhow::Result<()> {
         let updates = client.get_updates(offset, 25).await?;
         for update in updates {
             offset = update.update_id + 1;
-            if let Some(file_id) = &update.message.as_ref().and_then(Message::audio_file_id) {
-                match client.extract_bytes(file_id).await {
-                    Ok(audio_raw) => {
-                        let cache = format!("cache/voice_{}.oga", update.update_id);
-                        fs::write(&cache, &audio_raw).await?;
-                        println!("Saved {} ({} bytes)", cache, audio_raw.len());
-                    }
-                    Err(e) => eprintln!("Skipping {} due to error: {:#}", update.update_id, e),
-                }
+            let Some(msg) = update.message.as_ref() else { continue };
+            let Some(file_id) = msg.audio_file_id() else { continue };
+            let chat_id = msg.chat.id;
+
+            let result = async {
+                let oga_in = client.extract_bytes(file_id).await?;
+                let pcm = audio::decode_voice(&oga_in)?;
+                let chipped = audio::effect::chipmunk(&pcm, 1.5);
+                let oga_out = audio::encode_voice(&chipped)?;
+                client.send_voice(chat_id, oga_out).await?;
+                anyhow::Ok(())
+            }
+            .await;
+
+            if let Err(e) = result {
+                eprintln!("INFO: skipping {} due to error: {:#}", update.update_id, e);
             }
         }
     }
