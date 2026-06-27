@@ -1,5 +1,5 @@
-use std::io::Cursor;
 use opus::{Channels, Decoder};
+use std::io::Cursor;
 
 fn demux_ogg(audio_raw: &[u8]) -> anyhow::Result<Vec<Vec<u8>>> {
     let cursor = Cursor::new(audio_raw);
@@ -8,7 +8,7 @@ fn demux_ogg(audio_raw: &[u8]) -> anyhow::Result<Vec<Vec<u8>>> {
     let mut packets = Vec::new();
     while let Some(packet) = reader.read_packet()? {
         packets.push(packet.data);
-    } 
+    }
 
     Ok(packets)
 }
