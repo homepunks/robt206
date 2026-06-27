@@ -26,7 +26,7 @@ async fn main() -> anyhow::Result<()> {
             let result = async {
                 let oga_in = client.extract_bytes(file_id).await?;
                 let pcm = audio::decode_voice(&oga_in)?;
-                let chipped = audio::effect::chipmunk(&pcm, 1.5);
+                let chipped = audio::effect::chipmunk(&pcm, 1.67);
                 let oga_out = audio::encode_voice(&chipped)?;
                 client.send_voice(chat_id, oga_out).await?;
                 anyhow::Ok(())
