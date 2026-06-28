@@ -8,8 +8,6 @@ use tokio::fs;
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv().ok();
     let token = env::var("TG_BOT_TOKEN")?;
-    fs::create_dir_all("cache").await?;
-    println!("INFO: created directory for storing cache...");
     let client = tg::Client::new(token);
 
     println!("INFO: starting polling...");
