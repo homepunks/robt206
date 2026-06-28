@@ -1,5 +1,5 @@
 use crate::tg::models::{File, Response, Update, User};
-use reqwest::multipart::{Part, Form};
+use reqwest::multipart::{Form, Part};
 
 pub struct Client {
     http: reqwest::Client,
@@ -93,12 +93,12 @@ impl Client {
             .part("voice", voice);
 
         self.http
-          .post(&url)
-          .multipart(form)
-          .send()
-          .await?
-          .error_for_status()?;
+            .post(&url)
+            .multipart(form)
+            .send()
+            .await?
+            .error_for_status()?;
 
-      Ok(())
+        Ok(())
     }
 }
