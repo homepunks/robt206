@@ -20,6 +20,14 @@ async fn main() -> anyhow::Result<()> {
             let Some(file_id) = msg.audio_file_id() else { continue };
             let chat_id = msg.chat.id;
 
+            let username = msg
+                .from
+                .as_ref()
+                .and_then(|u| u.username.as_deref())
+                .map(|u| format!("@{u}"))
+                .unwrap_or_else(|| "<anonymous>".to_string());
+            println!("INFO: received voice from @{}", username);
+
             let result = async {
                 let oga_in = client.extract_bytes(file_id).await?;
                 let pcm = audio::decode_voice(&oga_in)?;
