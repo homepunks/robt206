@@ -31,6 +31,8 @@ pub struct Message {
     pub chat: Chat,
     pub voice: Option<Voice>,
     pub audio: Option<Audio>,
+    pub text: Option<String>,
+    pub reply_to_message: Option<Box<Message>>,
 }
 
 #[derive(serde::Deserialize, Debug)]
