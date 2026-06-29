@@ -1,6 +1,6 @@
+use crate::audio;
 use crate::tg::cli::{self, Cli};
 use crate::tg::{Client, Message, Update};
-use crate::audio;
 
 pub async fn run(client: &Client) -> anyhow::Result<()> {
     println!("INFO: starting polling...");
@@ -18,9 +18,15 @@ pub async fn run(client: &Client) -> anyhow::Result<()> {
 }
 
 async fn handle_update(client: &Client, update: &Update) -> anyhow::Result<()> {
-    let Some(msg) = update.message.as_ref() else { return Ok(()) };
-    let Some(txt) = msg.text.as_deref() else { return Ok(()) };
-    let Some(cmd) = cli::detect_cmd(txt) else { return Ok(()) };
+    let Some(msg) = update.message.as_ref() else {
+        return Ok(());
+    };
+    let Some(txt) = msg.text.as_deref() else {
+        return Ok(());
+    };
+    let Some(cmd) = cli::detect_cmd(txt) else {
+        return Ok(());
+    };
 
     match cmd {
         Cli::CHIPMUNK => handle_chipmunk(client, msg).await,
@@ -28,8 +34,12 @@ async fn handle_update(client: &Client, update: &Update) -> anyhow::Result<()> {
 }
 
 async fn handle_chipmunk(client: &Client, msg: &Message) -> anyhow::Result<()> {
-    let Some(reply) = msg.reply_to_message.as_deref() else { return Ok(()) };
-    let Some(file_id) = reply.audio_file_id() else { return Ok(()) };
+    let Some(reply) = msg.reply_to_message.as_deref() else {
+        return Ok(());
+    };
+    let Some(file_id) = reply.audio_file_id() else {
+        return Ok(());
+    };
 
     let oga_in = client.extract_bytes(file_id).await?;
     let pcm = audio::decode_voice(&oga_in)?;
