@@ -17,3 +17,7 @@ pub fn chipmunk(pcm: &[f32], speed: f32) -> Vec<f32> {
 
     out
 }
+
+pub fn reverse(pcm: &[f32]) -> Vec<f32> {
+    pcm.iter().rev().copied().collect()
+}
