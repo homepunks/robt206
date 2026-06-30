@@ -31,6 +31,7 @@ async fn handle_update(client: &Client, update: &Update) -> anyhow::Result<()> {
     match cmd {
         Cli::CHIPMUNK => handle_chipmunk(client, msg).await,
         Cli::REVERSE  => handle_reverse(client, msg).await,
+        Cli::ROBOT    => handle_robot(client, msg).await,
     }
 }
 
@@ -67,6 +68,24 @@ async fn handle_reverse(client: &Client, msg: &Message) -> anyhow::Result<()> {
     client.send_voice(msg.chat.id, oga_out).await?;
 
     println!("INFO: reversed voice from {}", sender_label(msg));
+    Ok(())
+}
+
+async fn handle_robot(client: &Client, msg: &Message) -> anyhow::Result<()> {
+    let Some(reply) = msg.reply_to_message.as_deref() else {
+        return Ok(());
+    };
+    let Some(file_id) = reply.audio_file_id() else {
+        return Ok(());
+    };
+
+    let oga_in = client.extract_bytes(file_id).await?;
+    let pcm = audio::decode_voice(&oga_in)?;
+    let bot = audio::effect::robot(&pcm, 60.0);
+    let oga_out = audio::encode_voice(&bot)?;
+    client.send_voice(msg.chat.id, oga_out).await?;
+
+    println!("INFO: robo voice from {}", sender_label(msg));
     Ok(())
 }
 
